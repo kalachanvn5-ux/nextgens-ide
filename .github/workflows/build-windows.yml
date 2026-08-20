@@ -50,6 +50,7 @@ jobs:
           Push-Location build
           npm install --ignore-scripts ternary-stream gulp-merge-json glob@5 event-stream
           Pop-Location
+          npm install --ignore-scripts scope-tailwind@1.0.10
         shell: powershell
 
       - name: Install ALL subdirectory dependencies
@@ -103,12 +104,12 @@ jobs:
         shell: powershell
         continue-on-error: true
 
-      - name: Build React UI
-        run: npm run buildreact
-        shell: powershell
-
       - name: Compile TypeScript
         run: npm run compile
+        shell: powershell
+
+      - name: Build React UI
+        run: npm run buildreact
         shell: powershell
 
       - name: Upload build artifacts
