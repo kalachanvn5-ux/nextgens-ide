@@ -10,6 +10,10 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 120
 
+    env:
+      GYP_MSVS_VERSION: "2022"
+      npm_config_arch: x64
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,41 +28,34 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Configure node-gyp
-        run: |
-          npm config set msvs_version 2022
-          npm install --global node-gyp
-          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath 2>$null
-          if (-not $vsPath) { $vsPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" }
-          Write-Host "VS Path: $vsPath"
-          npm config set msvs_version 2022
-          [System.Environment]::SetEnvironmentVariable("GYP_MSVS_OVERRIDE_PATH", $vsPath, "Process")
-          [System.Environment]::SetEnvironmentVariable("GYP_MSVS_VERSION", "2022", "Process")
+      - name: Install node-gyp globally
+        run: npm install --global node-gyp
         shell: powershell
 
       - name: Install dependencies (skip native scripts)
         run: npm install --ignore-scripts
         shell: powershell
 
-      - name: Build native modules with VS2022
+      - name: Build native modules
         run: |
+          $vsPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath)
+          Write-Host "VS Path: $vsPath"
+          $env:GYP_MSVS_OVERRIDE_PATH = $vsPath
           $modules = @('@vscode/deviceid', '@parcel/watcher', '@vscode/spdlog', '@vscode/sqlite3')
           foreach ($mod in $modules) {
             $modPath = "node_modules/$mod"
             if (Test-Path $modPath) {
               Write-Host "Building $mod..."
               Push-Location $modPath
-              node-gyp rebuild --msvs_version=2022 2>&1
+              node-gyp rebuild
               Pop-Location
             }
           }
         shell: powershell
         continue-on-error: true
 
-      - name: Install missing build dependencies
-        run: |
-          npm install ternary-stream event-stream --ignore-scripts
-          try { npm install --prefix build --ignore-scripts } catch { Write-Host "build prefix install failed, continuing..." }
+      - name: Install ternary-stream for build tools
+        run: npm install ternary-stream event-stream --ignore-scripts
         shell: powershell
         continue-on-error: true
 
@@ -79,6 +76,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: NextGens-Windows
-          path: |
-            out/
+          path: out/
           retention-days: 7
