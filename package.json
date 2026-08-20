@@ -269,6 +269,8 @@
     "tslib": "^2.6.3",
     "tsup": "^8.5.1",
     "scope-tailwind": "1.0.10",
+    "mermaid": "^11.12.3",
+    "@vscode/codicons": "^0.0.36",
     "typescript": "^6.0.0-dev.20260401",
     "typescript-eslint": "^8.45.0",
     "util": "^0.12.4",
