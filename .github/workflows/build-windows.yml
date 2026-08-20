@@ -1,0 +1,66 @@
+name: Build NextGens for Windows
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # allows manual trigger from GitHub UI
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.1'
+
+      - name: Setup Python (required for node-gyp)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Visual Studio Build Tools
+        run: |
+          npm install --global windows-build-tools --vs2022 2>&1 || true
+          npm install --global node-gyp
+
+      - name: Install dependencies
+        run: npm install
+        env:
+          npm_config_msvs_version: '2022'
+
+      - name: Build React UI
+        run: npm run buildreact
+
+      - name: Compile TypeScript
+        run: npm run compile
+
+      - name: Package Windows app
+        run: npm run gulp vscode-win32-x64-archive
+        continue-on-error: true
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: NextGens-Windows
+          path: |
+            .build/
+            out/
+          retention-days: 7
+
+      - name: Create Release
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0-nextgens
+          name: NextGens v1.0.0
+          draft: false
+          prerelease: false
+          files: .build/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
