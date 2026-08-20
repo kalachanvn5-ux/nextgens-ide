@@ -51,7 +51,12 @@ jobs:
         continue-on-error: true
 
       - name: Build React UI
-        run: npm run buildreact
+        run: |
+          cd src/vs/workbench/contrib/cortexide/browser/react
+          node build.js
+          cd ../../../../../../../
+          New-Item -ItemType Directory -Force -Path "out/vs/workbench/contrib/cortexide/browser/react/out"
+          Copy-Item -Recurse -Force "src/vs/workbench/contrib/cortexide/browser/react/out/*" "out/vs/workbench/contrib/cortexide/browser/react/out/"
         shell: powershell
 
       - name: Compile TypeScript
