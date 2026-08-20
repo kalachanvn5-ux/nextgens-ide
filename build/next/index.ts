@@ -8,7 +8,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 
-import { createRequire as _createRequire_glob } from 'node:module'; const glob = _createRequire_glob(import.meta.url)('glob');
+import { createRequire as _createRequire_glob } from 'node:module';
+const _globRaw = _createRequire_glob(import.meta.url)('glob');
+// Normalise across glob v5 (callable) and glob v8+ (object with .glob method)
+const _globFn: Function = typeof _globRaw === 'function' ? _globRaw : (_globRaw.glob ?? _globRaw.default ?? _globRaw);
+const glob = promisify(_globFn);
 import gulpWatch from '../lib/watch/index.ts';
 import { nlsPlugin, createNLSCollector, finalizeNLS, postProcessNLS } from './nls-plugin.ts';
 import { convertPrivateFields, adjustSourceMap, type ConvertPrivateFieldsResult } from './private-to-property.ts';
@@ -19,7 +23,7 @@ import packageJson from '../../package.json' with { type: 'json' };
 import { useEsbuildTranspile } from '../buildConfig.ts';
 import { isWebExtension, type IScannedBuiltinExtension } from '../lib/extensions.ts';
 
-const globAsync = promisify(glob);
+const globAsync = glob;
 
 // ============================================================================
 // Configuration

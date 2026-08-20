@@ -35,13 +35,23 @@ import { getCopilotExcludeFilter, prepareBuiltInCopilotRipgrepShim } from './lib
 import type { EmbeddedProductInfo } from './lib/embeddedType.ts';
 import { useEsbuildTranspile } from './buildConfig.ts';
 import { promisify } from 'util';
-import { createRequire as _createRequire_glob } from 'node:module'; const globCallback = _createRequire_glob(import.meta.url)('glob');
+import { createRequire as _createRequire_glob } from 'node:module';
+const _globModule = _createRequire_glob(import.meta.url)('glob');
+const glob = (pattern: string, opts?: any): Promise<string[]> => {
+	const fn = _globModule.glob || _globModule.default?.glob || _globModule.default || _globModule;
+	if (typeof fn === 'function' && fn.length >= 2) {
+		return new Promise<string[]>((resolve, reject) => {
+			fn(pattern, opts || {}, (err: any, files: string[]) => err ? reject(err) : resolve(files));
+		});
+	}
+	// glob v8+ returns a promise directly
+	return typeof fn === 'function' ? fn(pattern, opts || {}) : Promise.reject(new Error('glob not found'));
+};
 import rceditCallback from 'rcedit';
 import * as cp from 'child_process';
 import { spawnTsgo } from './lib/tsgo.ts';
 
 
-const glob = promisify(globCallback);
 const rcedit = promisify(rceditCallback);
 const root = path.dirname(import.meta.dirname);
 const commit = getVersion(root);

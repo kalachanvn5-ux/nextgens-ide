@@ -10,7 +10,12 @@ EventEmitter.defaultMaxListeners = 100;
 import es from './lib/event-stream-compat.ts';
 import fancyLog from 'fancy-log';
 import * as fs from 'fs';
-import { createRequire as _createRequire_glob } from 'node:module'; const glob = _createRequire_glob(import.meta.url)('glob');
+import { createRequire as _createRequire_glob } from 'node:module';
+import { promisify as _promisify } from 'util';
+const _globRaw = _createRequire_glob(import.meta.url)('glob');
+// Normalise across glob v5 (callable) and glob v8+ (object with .glob method)
+const _globFn: Function = typeof _globRaw === 'function' ? _globRaw : (_globRaw.glob ?? _globRaw.default ?? _globRaw);
+const glob = _promisify(_globFn);
 import gulp from 'gulp';
 import filter from 'gulp-filter';
 import plumber from 'gulp-plumber';
@@ -318,7 +323,7 @@ async function buildWebExtensions(isWatch: boolean): Promise<void> {
 	const extensionsPath = path.join(root, 'extensions');
 
 	// Find all esbuild.browser.mts files
-	const esbuildConfigLocations = await nodeUtil.promisify(glob)(
+	const esbuildConfigLocations = await glob(
 		path.join(extensionsPath, '**', 'esbuild.browser.mts'),
 		{ ignore: ['**/node_modules'] }
 	);

@@ -48,7 +48,7 @@ jobs:
       - name: Force install critical build tools
         run: |
           Push-Location build
-          npm install --ignore-scripts ternary-stream gulp-merge-json glob event-stream
+          npm install --ignore-scripts ternary-stream gulp-merge-json glob@5 event-stream
           Pop-Location
         shell: powershell
 

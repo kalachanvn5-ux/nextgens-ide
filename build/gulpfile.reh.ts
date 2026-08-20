@@ -24,8 +24,12 @@ import gunzip from 'gulp-gunzip';
 import { untar } from './lib/util.ts';
 import File from 'vinyl';
 import * as fs from 'fs';
-import { createRequire as _createRequire_glob } from 'node:module'; const glob = _createRequire_glob(import.meta.url)('glob');
+import { createRequire as _createRequire_glob } from 'node:module';
 import { promisify } from 'util';
+const _globRaw = _createRequire_glob(import.meta.url)('glob');
+// Normalise across glob v5 (callable) and glob v8+ (object with .glob method)
+const _globFn: Function = typeof _globRaw === 'function' ? _globRaw : (_globRaw.glob ?? _globRaw.default ?? _globRaw);
+const glob = promisify(_globFn);
 import rceditCallback from 'rcedit';
 import { compileBuildWithManglingTask } from './gulpfile.compile.ts';
 import { cleanExtensionsBuildTask, compileNonNativeExtensionsBuildTask, compileNativeExtensionsBuildTask, compileExtensionMediaBuildTask, compileCopilotExtensionBuildTask } from './gulpfile.extensions.ts';
@@ -467,8 +471,8 @@ function patchWin32DependenciesTask(destinationFolderName: string) {
 
 	return async () => {
 		const deps = (await Promise.all([
-			promisify(glob)('**/*.node', { cwd }),
-			promisify(glob)('**/rg.exe', { cwd }),
+			glob('**/*.node', { cwd }),
+			glob('**/rg.exe', { cwd }),
 		])).flatMap(o => o);
 		const packageJsonContents = JSON.parse(await fs.promises.readFile(path.join(cwd, 'package.json'), 'utf8'));
 		const productContents = JSON.parse(await fs.promises.readFile(path.join(cwd, 'product.json'), 'utf8'));
