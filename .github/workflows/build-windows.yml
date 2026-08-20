@@ -53,7 +53,7 @@ jobs:
       - name: Install build/ dependencies directly (fallback)
         run: |
           Set-Location build
-          npm install
+          npm install --ignore-scripts
           Set-Location ..
         shell: powershell
         continue-on-error: true
