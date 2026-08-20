@@ -30,7 +30,7 @@ jobs:
           lfs: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
 
@@ -178,7 +178,7 @@ jobs:
           # the copilot simulation cache are not present on our LFS server.
           lfs: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: extensions/copilot/.nvmrc
 
@@ -224,7 +224,7 @@ jobs:
           # LFS disabled: telemetry extractor scans TS sources only.
           lfs: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: '22.21.x'
 
@@ -247,7 +247,7 @@ jobs:
           lfs: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '22.21.x'
 
@@ -355,7 +355,7 @@ jobs:
           lfs: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '22.21.x'
 
