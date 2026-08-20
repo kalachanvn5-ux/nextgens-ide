@@ -55,6 +55,16 @@ jobs:
           Set-Location build
           npm install --ignore-scripts
           Set-Location ..
+          # Install extension deps that postinstall missed
+          $extDirs = @('extensions/mermaid-chat-features', 'extensions/copilot', 'extensions/github', 'extensions/github-authentication')
+          foreach ($dir in $extDirs) {
+            if (Test-Path $dir) {
+              Write-Host "Installing deps for $dir..."
+              Push-Location $dir
+              npm install --ignore-scripts 2>&1 | Out-Null
+              Pop-Location
+            }
+          }
         shell: powershell
         continue-on-error: true
 
