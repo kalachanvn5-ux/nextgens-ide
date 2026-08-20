@@ -35,7 +35,7 @@ import { ILanguageFeaturesService } from '../../../../editor/common/services/lan
 import { ChatMessage, ChatImageAttachment, ChatPDFAttachment, CheckpointEntry, CodespanLocationLink, StagingSelectionItem, ToolMessage, PlanMessage, PlanStep, StepStatus, ReviewMessage } from '../common/chatThreadServiceTypes.js';
 import { selectCompactionWindow } from '../common/compactionPolicy.js';
 import { computeCompactionOverflowDecision, shouldEscalateModel, computePostEscalationCounters, decideFileReadGate, classifyToolStepOutcome, decideLoopContinuation, classifyCompletionState, type ToolMessageType } from '../common/agentLoopDecisions.js';
-import { isRateLimitErrorMessage } from '../common/providerErrorFormat.js';
+import { isRateLimitErrorMessage, isContextSizeErrorMessage } from '../common/providerErrorFormat.js';
 import { createSerializer } from '../common/asyncSerializer.js';
 
 // File-edit tools whose application is serialized across concurrent agent threads (see _editSerializer)
@@ -4205,6 +4205,17 @@ Output ONLY the JSON, no other text. Start with { and end with }.`
 				// llm res error
 				else if (llmRes.type === 'llmError') {
 					const { error } = llmRes
+
+					// Auto-retry with fresh truncated context on context size errors
+					const isCtxError = isContextSizeErrorMessage(error?.message || '')
+					if (isCtxError) {
+						// Clear the error state and start fresh with only the last user message
+						this._setStreamState(threadId, { isRunning: 'LLM', llmInfo: { displayContentSoFar: 'Context limit reached — retrying with fresh context...', reasoningSoFar: '', toolCallSoFar: null }, interrupt: Promise.resolve(() => { }) })
+						// Trim chat history to only keep system + last user message for a fresh start
+						chatMessages = chatMessages.slice(-2) // Keep last 2 messages (system + last user)
+						nMessagesSent = 0 // Reset counter so it retries
+						continue // Retry the loop with trimmed context
+					}
 					// Check if this is a rate limit / quota-exhaustion error. Must match the SAME shapes the
 					// service layer treats as rate-limits (it injects the "all free tiers exhausted" message on
 					// these) — notably Google's "quota exceeded" / "RESOURCE_EXHAUSTED", which the old check

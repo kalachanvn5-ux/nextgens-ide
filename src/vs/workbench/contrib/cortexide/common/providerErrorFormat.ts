@@ -28,6 +28,21 @@ export const isRateLimitErrorMessage = (errorMessage: string): boolean => {
 };
 
 /**
+ * Detects context size / token limit errors (e.g. "400 request (21172 tokens) exceeds the available context size (16384 tokens)").
+ * When this error occurs, the agent should auto-retry with a fresh truncated context.
+ */
+export const isContextSizeErrorMessage = (errorMessage: string): boolean => {
+	const lo = errorMessage.toLowerCase();
+	return (lo.includes('exceeds') && lo.includes('context')) ||
+		lo.includes('context_length_exceeded') ||
+		lo.includes('maximum context length') ||
+		lo.includes('context window') ||
+		(lo.includes('tokens') && lo.includes('exceeds') && lo.includes('available')) ||
+		lo.includes('prompt is too long') ||
+		lo.includes('reduce the length');
+};
+
+/**
  * Format a Gemini rate-limit / quota error into a friendly message with a parsed retry delay.
  *
  * Mirrors `sendGeminiChat`'s inline catch byte-for-byte. `errorMessage` is the raw `error.message`
