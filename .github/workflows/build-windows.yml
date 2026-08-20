@@ -13,6 +13,7 @@ jobs:
     env:
       GYP_MSVS_VERSION: "2022"
       npm_config_arch: x64
+      SKIP_SUBMODULE_DEPS: "1"
 
     steps:
       - name: Checkout code
@@ -32,37 +33,19 @@ jobs:
         run: npm install --global node-gyp
         shell: powershell
 
-      - name: Install dependencies (skip native scripts)
-        run: npm install --ignore-scripts
-        shell: powershell
-
-      - name: Build native modules
+      - name: Set VS path for node-gyp
         run: |
-          $vsPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath)
-          Write-Host "VS Path: $vsPath"
-          $env:GYP_MSVS_OVERRIDE_PATH = $vsPath
-          $modules = @('@vscode/deviceid', '@parcel/watcher', '@vscode/spdlog', '@vscode/sqlite3')
-          foreach ($mod in $modules) {
-            $modPath = "node_modules/$mod"
-            if (Test-Path $modPath) {
-              Write-Host "Building $mod..."
-              Push-Location $modPath
-              node-gyp rebuild
-              Pop-Location
-            }
-          }
+          $vsPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath 2>$null)
+          if (-not $vsPath) { $vsPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" }
+          Write-Host "Using VS at: $vsPath"
+          echo "GYP_MSVS_OVERRIDE_PATH=$vsPath" >> $env:GITHUB_ENV
         shell: powershell
-        continue-on-error: true
 
-      - name: Install ternary-stream for build tools
-        run: npm install ternary-stream event-stream --ignore-scripts
+      - name: Full npm install
+        run: npm install
         shell: powershell
-        continue-on-error: true
-
-      - name: Run postinstall
-        run: node build/npm/postinstall.ts
-        shell: powershell
-        continue-on-error: true
+        env:
+          npm_config_arch: x64
 
       - name: Build React UI
         run: npm run buildreact
