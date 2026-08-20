@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout microsoft/vscode
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # LFS disabled: the copilot simulation-cache sqlite pointers in this
           # repo reference LFS objects that don't exist on our LFS server (404).
@@ -171,7 +171,7 @@ jobs:
       pull-requests: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # LFS disabled: cache-cli check + pr-check-cache-files.ts operate on
           # file listings / pointer metadata, not blob content. LFS objects for
@@ -219,7 +219,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # LFS disabled: telemetry extractor scans TS sources only.
           lfs: false
@@ -242,7 +242,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
 
@@ -350,7 +350,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
 

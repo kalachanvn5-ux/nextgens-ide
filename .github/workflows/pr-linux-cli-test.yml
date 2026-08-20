@@ -16,7 +16,7 @@ jobs:
       RUSTUP_TOOLCHAIN: ${{ inputs.rustup_toolchain }}
     steps:
       - name: Checkout microsoft/vscode
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # LFS disabled: the CLI Rust tests do not exercise the copilot
           # simulation cache (the only LFS-tracked files in the repo) and our
