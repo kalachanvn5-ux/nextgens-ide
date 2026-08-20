@@ -124,6 +124,7 @@ const nameOfChatMode: Record<ChatMode, string> = {
 	'gather': 'Gather',
 	'plan': 'Plan',
 	'agent': 'Agent',
+	'spec': 'Spec',
 }
 
 const detailOfChatMode: Record<ChatMode, string> = {
@@ -131,6 +132,7 @@ const detailOfChatMode: Record<ChatMode, string> = {
 	'gather': 'Reads files, no edits',
 	'plan': 'Plans first, then executes',
 	'agent': 'Edits files and uses tools',
+	'spec': 'Requirements → Design → Tasks → Implement',
 }
 
 
@@ -140,7 +142,7 @@ const ChatModeDropdown = ({ className }: { className: string }) => {
 	const cortexideSettingsService = accessor.get('ICortexideSettingsService')
 	const settingsState = useSettingsState()
 
-	const options: ChatMode[] = useMemo(() => ['normal', 'gather', 'plan', 'agent'], [])
+	const options: ChatMode[] = useMemo(() => ['normal', 'gather', 'plan', 'agent', 'spec'], [])
 
 	const onChangeOption = useCallback((newVal: ChatMode) => {
 		cortexideSettingsService.setGlobalSetting('chatMode', newVal)
@@ -158,7 +160,33 @@ const ChatModeDropdown = ({ className }: { className: string }) => {
 		getOptionDropdownDetail={(val) => detailOfChatMode[val]}
 		getOptionsEqual={(a, b) => a === b}
 	/>
+}
 
+// Autopilot toggle — auto-approves all tool calls (file edits, terminal, etc.)
+const AutopilotToggle = () => {
+	const accessor = useAccessor()
+	const cortexideSettingsService = accessor.get('ICortexideSettingsService')
+	const settingsState = useSettingsState()
+
+	const isAutopilot = Object.values(settingsState.globalSettings.autoApprove ?? {}).every(Boolean)
+
+	const onToggle = useCallback((newVal: boolean) => {
+		const allApprovalTypes = ['edit', 'terminal', 'bash', 'tools'] as const
+		const newAutoApprove: Record<string, boolean> = {}
+		allApprovalTypes.forEach(t => { newAutoApprove[t] = newVal })
+		cortexideSettingsService.setGlobalSetting('autoApprove', newAutoApprove as any)
+	}, [cortexideSettingsService])
+
+	return (
+		<div className='flex items-center gap-1.5 cortex-composer-control px-1.5'>
+			<span className='text-void-fg-3 text-xs'>Autopilot</span>
+			<VoidSwitch
+				size='xxs'
+				value={isAutopilot}
+				onChange={onToggle}
+			/>
+		</div>
+	)
 }
 
 
@@ -507,6 +535,7 @@ export const VoidChatArea: React.FC<CortexideChatAreaProps> = ({
 						<ReasoningOptionSlider featureName={featureName} />
 					</div>
 				)}
+				{featureName === 'Chat' && <AutopilotToggle />}
 
 				{/* Loading indicator */}
 				{isStreaming && loadingIcon && (
