@@ -9,6 +9,20 @@ import { ContextUsageBar } from './ContextUsageBar.js';
 import { ComposerInputArea, ComposerInputAreaProps } from './ComposerInputArea.js';
 import { ModelSelection } from '../../../../common/cortexideSettingsTypes.js';
 
+// Working... bar shown while the AI is generating a response
+const WorkingBar = ({ onAbort }: { onAbort: () => void }) => (
+	<div className='working-bar' role='status' aria-live='polite'>
+		<span className='working-bar__label'>Working..</span>
+		<button
+			className='working-bar__cancel'
+			onClick={onAbort}
+			aria-label='Cancel generation'
+		>
+			Cancel
+		</button>
+	</div>
+);
+
 type ComposerInputSectionProps = ComposerInputAreaProps & {
 	variant: 'landing' | 'thread';
 	threadKey?: string;
@@ -37,6 +51,10 @@ export const ComposerInputSection = ({
 		/>
 	) : null;
 
+	const workingBar = inputProps.isStreaming
+		? <WorkingBar onAbort={inputProps.onAbort} />
+		: null;
+
 	if (variant === 'thread') {
 		return (
 			<div key={'input' + (threadKey ?? '')}>
@@ -44,6 +62,7 @@ export const ComposerInputSection = ({
 					<CommandBarInChat />
 				</div>
 				<div className='px-2 pb-2'>
+					{workingBar}
 					{inputArea}
 					{contextBar}
 				</div>
@@ -54,6 +73,7 @@ export const ComposerInputSection = ({
 	return (
 		<div>
 			<div className='pt-8'>
+				{workingBar}
 				{inputArea}
 				{contextBar}
 			</div>

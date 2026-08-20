@@ -554,3 +554,44 @@ body.vscode-light .void-scope .btn-submit:not(:disabled):hover {
 	border-left: 1px solid color-mix(in srgb, var(--cortex-border-weak) 40%, transparent);
 	border-right: 1px solid color-mix(in srgb, var(--cortex-border-weak) 40%, transparent);
 }
+
+/* ── Working bar (shown while AI is generating) ───────────────────────────── */
+.void-scope .working-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 14px;
+	margin-bottom: 6px;
+	background: var(--cortex-surface-2);
+	border: 1px solid var(--cortex-border-weak);
+	border-radius: 9999px;          /* pill shape — matches Kiro */
+	font-size: 13px;
+	line-height: 1;
+	color: var(--cortex-text-base);
+}
+
+.void-scope .working-bar__label {
+	color: var(--cortex-text-muted);
+	font-size: 13px;
+	user-select: none;
+}
+
+.void-scope .working-bar__cancel {
+	background: transparent;
+	border: none;
+	padding: 0;
+	font-size: 13px;
+	color: var(--cortex-text-muted);
+	cursor: pointer;
+	transition: color var(--cortex-transition-base, 150ms ease);
+}
+
+.void-scope .working-bar__cancel:hover {
+	color: var(--cortex-text-base);
+}
+
+.void-scope .working-bar__cancel:focus-visible {
+	outline: 1px solid var(--cortex-ring-color);
+	outline-offset: 2px;
+	border-radius: 3px;
+}
