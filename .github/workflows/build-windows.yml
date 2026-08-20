@@ -28,6 +28,12 @@ jobs:
         run: |
           npm config set msvs_version 2022
           npm install --global node-gyp
+          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath 2>$null
+          if (-not $vsPath) { $vsPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" }
+          Write-Host "VS Path: $vsPath"
+          npm config set msvs_version 2022
+          [System.Environment]::SetEnvironmentVariable("GYP_MSVS_OVERRIDE_PATH", $vsPath, "Process")
+          [System.Environment]::SetEnvironmentVariable("GYP_MSVS_VERSION", "2022", "Process")
         shell: powershell
 
       - name: Install dependencies (skip native scripts)
@@ -52,7 +58,7 @@ jobs:
       - name: Install missing build dependencies
         run: |
           npm install ternary-stream event-stream --ignore-scripts
-          npm install --prefix build --ignore-scripts 2>&1 || true
+          try { npm install --prefix build --ignore-scripts } catch { Write-Host "build prefix install failed, continuing..." }
         shell: powershell
         continue-on-error: true
 
