@@ -3,7 +3,7 @@ name: Build NextGens for Windows
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:  # allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build-windows:
@@ -19,20 +19,21 @@ jobs:
         with:
           node-version: '22.22.1'
 
-      - name: Setup Python (required for node-gyp)
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Visual Studio Build Tools
+      - name: Install Visual Studio components
         run: |
-          npm install --global windows-build-tools --vs2022 2>&1 || true
-          npm install --global node-gyp
+          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --includeRecommended" -y
+        shell: powershell
 
       - name: Install dependencies
         run: npm install
         env:
           npm_config_msvs_version: '2022'
+          npm_config_arch: x64
 
       - name: Build React UI
         run: npm run buildreact
@@ -49,18 +50,6 @@ jobs:
         with:
           name: NextGens-Windows
           path: |
-            .build/
+            .build/*.zip
             out/
           retention-days: 7
-
-      - name: Create Release
-        if: success()
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.0-nextgens
-          name: NextGens v1.0.0
-          draft: false
-          prerelease: false
-          files: .build/*.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
