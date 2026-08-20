@@ -22,7 +22,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # LFS objects for the copilot simulation cache are not on our LFS
           # server. Monaco Editor checks don't need those files anyway.
