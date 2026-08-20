@@ -41,18 +41,12 @@ jobs:
           echo "GYP_MSVS_VERSION=2022" >> $env:GITHUB_ENV
         shell: powershell
 
-      - name: Install root node_modules (skip scripts to avoid native failures)
+      - name: Install root node_modules
         run: npm install --ignore-scripts
         shell: powershell
 
-      - name: Run postinstall to install build/ and extensions/ dependencies
-        run: node build/npm/postinstall.ts
-        shell: powershell
-        continue-on-error: true
-
-      - name: Install build/ dependencies directly (fallback)
+      - name: Install ALL subdirectory dependencies
         run: |
-          # Install ALL subdirectories that postinstall was supposed to handle
           $dirs = @(
             'build', 'build/rspack', 'build/vite',
             'extensions', 'extensions/configuration-editing', 'extensions/copilot',
@@ -80,7 +74,7 @@ jobs:
             if (Test-Path $pkgJson) {
               Write-Host "Installing: $dir"
               Push-Location $dir
-              npm install --ignore-scripts 2>&1 | Select-Object -Last 3
+              npm install --ignore-scripts 2>&1 | Select-Object -Last 2
               Pop-Location
             }
           }
