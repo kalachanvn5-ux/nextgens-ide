@@ -45,6 +45,13 @@ jobs:
         run: npm install --ignore-scripts
         shell: powershell
 
+      - name: Force install critical build tools
+        run: |
+          Push-Location build
+          npm install --ignore-scripts ternary-stream gulp-merge-json glob event-stream
+          Pop-Location
+        shell: powershell
+
       - name: Install ALL subdirectory dependencies
         run: |
           $dirs = @(
