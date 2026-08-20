@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "event": "agent-stop",
+      "description": "Notify when agent finishes a task",
+      "run": "echo Agent task completed"
+    }
+  ]
+}
