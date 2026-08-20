@@ -24,25 +24,43 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Visual Studio components
+      - name: Configure node-gyp to use VS 2022
         run: |
-          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --includeRecommended" -y
+          npm config set msvs_version 2022
+          npm install --global node-gyp
         shell: powershell
 
       - name: Install dependencies
-        run: npm install
-        env:
-          npm_config_msvs_version: '2022'
-          npm_config_arch: x64
+        run: npm install --ignore-scripts
+        shell: powershell
+
+      - name: Build native modules manually
+        run: |
+          cd node_modules/@vscode/deviceid
+          node-gyp rebuild --msvs_version=2022
+          cd ../../..
+          cd node_modules/@parcel/watcher
+          node-gyp rebuild --msvs_version=2022
+          cd ../../..
+        shell: powershell
+        continue-on-error: true
+
+      - name: Run postinstall
+        run: node build/npm/postinstall.ts
+        shell: powershell
+        continue-on-error: true
 
       - name: Build React UI
         run: npm run buildreact
+        shell: powershell
 
       - name: Compile TypeScript
         run: npm run compile
+        shell: powershell
 
       - name: Package Windows app
         run: npm run gulp vscode-win32-x64-archive
+        shell: powershell
         continue-on-error: true
 
       - name: Upload build artifacts
