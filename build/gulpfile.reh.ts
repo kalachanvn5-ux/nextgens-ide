@@ -24,7 +24,7 @@ import gunzip from 'gulp-gunzip';
 import { untar } from './lib/util.ts';
 import File from 'vinyl';
 import * as fs from 'fs';
-import glob from 'glob';
+import { createRequire as _createRequire_glob } from 'node:module'; const glob = _createRequire_glob(import.meta.url)('glob');
 import { promisify } from 'util';
 import rceditCallback from 'rcedit';
 import { compileBuildWithManglingTask } from './gulpfile.compile.ts';

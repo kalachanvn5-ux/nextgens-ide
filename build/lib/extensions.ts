@@ -6,7 +6,7 @@
 import es from './event-stream-compat.ts';
 import fs from 'fs';
 import cp from 'child_process';
-import glob from 'glob';
+import { createRequire as _createRequire_glob } from 'node:module'; const glob = _createRequire_glob(import.meta.url)('glob');
 import gulp from 'gulp';
 import path from 'path';
 import crypto from 'crypto';

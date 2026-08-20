@@ -5,9 +5,10 @@
 import { EventEmitter } from 'events';
 EventEmitter.defaultMaxListeners = 100;
 
-import glob from 'glob';
-import gulp from 'gulp';
 import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const glob = require('glob');
+import gulp from 'gulp';
 import { monacoTypecheckTask /* , monacoTypecheckWatchTask */ } from './gulpfile.editor.ts';
 import { compileExtensionMediaTask, compileExtensionsTask, watchExtensionsTask } from './gulpfile.extensions.ts';
 import * as compilation from './lib/compilation.ts';
@@ -16,8 +17,6 @@ import * as util from './lib/util.ts';
 
 // Extension point names
 gulp.task(compilation.compileExtensionPointNamesTask);
-
-const require = createRequire(import.meta.url);
 
 // API proposal names
 gulp.task(compilation.compileApiProposalNamesTask);

@@ -10,7 +10,7 @@ EventEmitter.defaultMaxListeners = 100;
 import es from './lib/event-stream-compat.ts';
 import fancyLog from 'fancy-log';
 import * as fs from 'fs';
-import glob from 'glob';
+import { createRequire as _createRequire_glob } from 'node:module'; const glob = _createRequire_glob(import.meta.url)('glob');
 import gulp from 'gulp';
 import filter from 'gulp-filter';
 import plumber from 'gulp-plumber';

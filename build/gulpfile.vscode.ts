@@ -35,7 +35,7 @@ import { getCopilotExcludeFilter, prepareBuiltInCopilotRipgrepShim } from './lib
 import type { EmbeddedProductInfo } from './lib/embeddedType.ts';
 import { useEsbuildTranspile } from './buildConfig.ts';
 import { promisify } from 'util';
-import globCallback from 'glob';
+import { createRequire as _createRequire_glob } from 'node:module'; const globCallback = _createRequire_glob(import.meta.url)('glob');
 import rceditCallback from 'rcedit';
 import * as cp from 'child_process';
 import { spawnTsgo } from './lib/tsgo.ts';
