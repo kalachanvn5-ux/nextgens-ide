@@ -49,6 +49,13 @@ jobs:
         shell: powershell
         continue-on-error: true
 
+      - name: Install missing build dependencies
+        run: |
+          npm install ternary-stream event-stream --ignore-scripts
+          npm install --prefix build --ignore-scripts 2>&1 || true
+        shell: powershell
+        continue-on-error: true
+
       - name: Run postinstall
         run: node build/npm/postinstall.ts
         shell: powershell
@@ -62,16 +69,10 @@ jobs:
         run: npm run compile
         shell: powershell
 
-      - name: Package Windows app
-        run: npm run gulp vscode-win32-x64-archive
-        shell: powershell
-        continue-on-error: true
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: NextGens-Windows
           path: |
-            .build/*.zip
             out/
           retention-days: 7
