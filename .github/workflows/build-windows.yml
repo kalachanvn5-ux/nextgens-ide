@@ -24,24 +24,28 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Configure node-gyp to use VS 2022
+      - name: Configure node-gyp
         run: |
           npm config set msvs_version 2022
           npm install --global node-gyp
         shell: powershell
 
-      - name: Install dependencies
+      - name: Install dependencies (skip native scripts)
         run: npm install --ignore-scripts
         shell: powershell
 
-      - name: Build native modules manually
+      - name: Build native modules with VS2022
         run: |
-          cd node_modules/@vscode/deviceid
-          node-gyp rebuild --msvs_version=2022
-          cd ../../..
-          cd node_modules/@parcel/watcher
-          node-gyp rebuild --msvs_version=2022
-          cd ../../..
+          $modules = @('@vscode/deviceid', '@parcel/watcher', '@vscode/spdlog', '@vscode/sqlite3')
+          foreach ($mod in $modules) {
+            $modPath = "node_modules/$mod"
+            if (Test-Path $modPath) {
+              Write-Host "Building $mod..."
+              Push-Location $modPath
+              node-gyp rebuild --msvs_version=2022 2>&1
+              Pop-Location
+            }
+          }
         shell: powershell
         continue-on-error: true
 
@@ -51,12 +55,7 @@ jobs:
         continue-on-error: true
 
       - name: Build React UI
-        run: |
-          cd src/vs/workbench/contrib/cortexide/browser/react
-          node build.js
-          cd ../../../../../../../
-          New-Item -ItemType Directory -Force -Path "out/vs/workbench/contrib/cortexide/browser/react/out"
-          Copy-Item -Recurse -Force "src/vs/workbench/contrib/cortexide/browser/react/out/*" "out/vs/workbench/contrib/cortexide/browser/react/out/"
+        run: npm run buildreact
         shell: powershell
 
       - name: Compile TypeScript
