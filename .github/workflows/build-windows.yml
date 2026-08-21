@@ -75,6 +75,13 @@ jobs:
         shell: powershell
         continue-on-error: true
 
+      - name: Build React UI (pre-compile bundle)
+        run: |
+          Push-Location src/vs/workbench/contrib/cortexide/browser/react
+          node build.js
+          Pop-Location
+        shell: powershell
+
       - name: Compile TypeScript
         run: npm run compile
         shell: powershell
