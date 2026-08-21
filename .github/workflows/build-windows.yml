@@ -57,6 +57,7 @@ jobs:
         run: node build/npm/postinstall.ts
         env:
           npm_command: install
+          npm_config_ignore_scripts: "true"
         shell: powershell
 
       - name: Build native modules with VS2022
