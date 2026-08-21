@@ -11,7 +11,7 @@ const outDir = path.join(import.meta.dirname, 'media');
 
 // Resolve @vscode/codicons from the nearest node_modules (extension-local or repo root)
 const req = createRequire(import.meta.url);
-const codiconsDir = path.dirname(path.dirname(req.resolve('@vscode/codicons/package.json')));
+const codiconsDir = path.dirname(req.resolve('@vscode/codicons/package.json'));
 const codiconsCss = path.join(codiconsDir, 'dist', 'codicon.css');
 
 run({
