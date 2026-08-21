@@ -55,36 +55,25 @@ jobs:
 
       - name: Install ALL subdirectory dependencies
         run: |
-          $dirs = @(
-            'build', 'build/rspack', 'build/vite',
-            'extensions', 'extensions/configuration-editing', 'extensions/copilot',
-            'extensions/css-language-features', 'extensions/css-language-features/server',
-            'extensions/debug-auto-launch', 'extensions/debug-server-ready',
-            'extensions/emmet', 'extensions/extension-editing',
-            'extensions/git', 'extensions/git-base', 'extensions/github',
-            'extensions/github-authentication', 'extensions/grunt', 'extensions/gulp',
-            'extensions/html-language-features', 'extensions/html-language-features/server',
-            'extensions/ipynb', 'extensions/jake',
-            'extensions/json-language-features', 'extensions/json-language-features/server',
-            'extensions/markdown-language-features', 'extensions/markdown-math',
-            'extensions/media-preview', 'extensions/merge-conflict',
-            'extensions/mermaid-chat-features', 'extensions/microsoft-authentication',
-            'extensions/notebook-renderers', 'extensions/npm', 'extensions/open-remote-ssh',
-            'extensions/php-language-features', 'extensions/references-view',
-            'extensions/search-result', 'extensions/simple-browser',
-            'extensions/tunnel-forwarding', 'extensions/terminal-suggest',
-            'extensions/typescript-language-features',
-            'extensions/vscode-api-tests', 'extensions/vscode-colorize-tests',
-            'extensions/vscode-test-resolver'
-          )
+          # Dynamically find every directory under extensions/ that has a package.json
+          # (excluding node_modules and copilot test fixtures which have their own lockfiles)
+          $excludePatterns = @('node_modules', 'copilot/test/simulation/fixtures', 'copilot/chat-lib', 'serverPlugin')
+          $dirs = Get-ChildItem -Path 'extensions', 'build', 'build/rspack', 'build/vite' -Filter 'package.json' -Recurse -ErrorAction SilentlyContinue |
+            Where-Object {
+              $path = $_.FullName
+              $skip = $false
+              foreach ($pat in $excludePatterns) {
+                if ($path -match [regex]::Escape($pat)) { $skip = $true; break }
+              }
+              -not $skip
+            } |
+            ForEach-Object { $_.DirectoryName }
+
           foreach ($dir in $dirs) {
-            $pkgJson = Join-Path $dir 'package.json'
-            if (Test-Path $pkgJson) {
-              Write-Host "Installing: $dir"
-              Push-Location $dir
-              npm install --ignore-scripts 2>&1 | Select-Object -Last 2
-              Pop-Location
-            }
+            Write-Host "Installing: $dir"
+            Push-Location $dir
+            npm install --ignore-scripts 2>&1 | Select-Object -Last 3
+            Pop-Location
           }
         shell: powershell
         continue-on-error: true
