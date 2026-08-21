@@ -53,30 +53,11 @@ jobs:
           npm install --ignore-scripts scope-tailwind@1.0.10
         shell: powershell
 
-      - name: Install ALL subdirectory dependencies
-        run: |
-          # Dynamically find every directory under extensions/ that has a package.json
-          # (excluding node_modules and copilot test fixtures which have their own lockfiles)
-          $excludePatterns = @('node_modules', 'copilot/test/simulation/fixtures', 'copilot/chat-lib', 'serverPlugin')
-          $dirs = Get-ChildItem -Path 'extensions', 'build', 'build/rspack', 'build/vite' -Filter 'package.json' -Recurse -ErrorAction SilentlyContinue |
-            Where-Object {
-              $path = $_.FullName
-              $skip = $false
-              foreach ($pat in $excludePatterns) {
-                if ($path -match [regex]::Escape($pat)) { $skip = $true; break }
-              }
-              -not $skip
-            } |
-            ForEach-Object { $_.DirectoryName }
-
-          foreach ($dir in $dirs) {
-            Write-Host "Installing: $dir"
-            Push-Location $dir
-            npm install --ignore-scripts 2>&1 | Select-Object -Last 3
-            Pop-Location
-          }
+      - name: Install extension dependencies (postinstall)
+        run: node build/npm/postinstall.ts
+        env:
+          npm_command: install
         shell: powershell
-        continue-on-error: true
 
       - name: Build native modules with VS2022
         run: |

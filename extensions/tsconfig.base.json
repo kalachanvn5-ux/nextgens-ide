@@ -16,6 +16,10 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"forceConsistentCasingInFileNames": true,
-		"experimentalDecorators": true
+		"experimentalDecorators": true,
+		"types": [
+			"node",
+			"mocha"
+		]
 	}
 }
