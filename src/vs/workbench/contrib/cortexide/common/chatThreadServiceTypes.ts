@@ -159,6 +159,8 @@ export type StagingSelectionItem = {
 	uri: URI;
 	language: string;
 	state: { wasAddedAsCurrentFile: boolean; };
+	/** Optional line range when the file was added via a selection/symbol reference (matches the vscode Range shape used by the UI). */
+	range?: { startLineNumber: number; endLineNumber: number };
 } | {
 	type: 'CodeSelection';
 	range: [number, number];

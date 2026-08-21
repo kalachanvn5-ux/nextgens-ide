@@ -3563,7 +3563,7 @@ Output ONLY the JSON, no other text. Start with { and end with }.`
 
 			this._setStreamState(threadId, { isRunning: 'idle', interrupt: idleInterruptor })
 
-			const chatMessages = this.state.allThreads[threadId]?.messages ?? []
+			let chatMessages = this.state.allThreads[threadId]?.messages ?? []
 
 			// Check if we've already synthesized a tool for this original request (prevent infinite loops)
 			const allUserMessages = chatMessages.filter(m => m.role === 'user')
@@ -4825,7 +4825,7 @@ Output ONLY the JSON, no other text. Start with { and end with }.`
 					const mcpTools = this._mcpService.getMCPTools()
 					const mcpTool = mcpTools?.find(t => t.name === toolCall.name)
 
-					const { awaitingUserApproval, interrupted, completionSignaled } = await this._runToolCall(threadId, toolCall.name, toolCall.id, mcpTool?.mcpServerName, { preapproved: false, unvalidatedToolParams: toolCall.rawParams }, isLocalModel, chatMode, isCapableLocalModelFlag)
+					const { awaitingUserApproval = false, interrupted = false, completionSignaled = false } = await this._runToolCall(threadId, toolCall.name, toolCall.id, mcpTool?.mcpServerName, { preapproved: false, unvalidatedToolParams: toolCall.rawParams }, isLocalModel, chatMode, isCapableLocalModelFlag)
 
 					const toolCompletion = classifyCompletionState({
 						toolCall: { name: toolCall.name },

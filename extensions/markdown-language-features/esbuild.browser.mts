@@ -13,7 +13,11 @@ const outDir = path.join(import.meta.dirname, 'dist', 'browser');
  * Copy the language server worker main file to the output directory.
  */
 async function copyServerWorkerMain(outDir: string): Promise<void> {
-	const srcPath = path.join(import.meta.dirname, 'node_modules', 'vscode-markdown-languageserver', 'dist', 'browser', 'workerMain.js');
+	// Prefer the extension-local copy; fall back to the repo-root node_modules
+	// (needed when per-extension node_modules are not installed, e.g. CI with SKIP_SUBMODULE_DEPS).
+	const localPath = path.join(import.meta.dirname, 'node_modules', 'vscode-markdown-languageserver', 'dist', 'browser', 'workerMain.js');
+	const rootPath = path.join(import.meta.dirname, '..', '..', 'node_modules', 'vscode-markdown-languageserver', 'dist', 'browser', 'workerMain.js');
+	const srcPath = fs.existsSync(localPath) ? localPath : rootPath;
 	const destPath = path.join(outDir, 'serverWorkerMain.js');
 	await fs.promises.copyFile(srcPath, destPath);
 }

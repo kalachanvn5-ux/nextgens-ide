@@ -33,12 +33,13 @@ export const toChatImageAttachments = (attachments: ImageAttachmentDraft[]): Cha
 		.filter(att => att.uploadStatus === 'success' || !att.uploadStatus)
 		.map(att => ({
 			id: att.id,
-			data: att.data,
-			mimeType: att.mimeType,
+			data: new TextEncoder().encode(att.data),
+			mimeType: att.mimeType as ChatImageAttachment['mimeType'],
 			filename: att.filename,
-			width: att.width,
-			height: att.height,
-			size: att.size,
+			width: att.width ?? 0,
+			height: att.height ?? 0,
+			size: att.size ?? 0,
+			uploadStatus: att.uploadStatus as ChatImageAttachment['uploadStatus'],
 		}));
 
 export const toChatPDFAttachments = (attachments: PDFAttachmentDraft[]): ChatPDFAttachment[] =>
@@ -46,13 +47,14 @@ export const toChatPDFAttachments = (attachments: PDFAttachmentDraft[]): ChatPDF
 		.filter(att => att.uploadStatus !== 'failed')
 		.map(att => ({
 			id: att.id,
-			data: att.data,
+			data: new TextEncoder().encode(att.data),
 			filename: att.filename,
-			size: att.size,
+			size: att.size ?? 0,
 			pageCount: att.pageCount,
 			selectedPages: att.selectedPages,
 			extractedText: att.extractedText,
 			pagePreviews: att.pagePreviews,
+			uploadStatus: att.uploadStatus as ChatPDFAttachment['uploadStatus'],
 		}));
 
 export const getProcessingPDFFilenames = (attachments: PDFAttachmentDraft[]): string[] =>

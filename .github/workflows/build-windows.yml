@@ -101,9 +101,20 @@ jobs:
         run: npm run buildreact
         shell: powershell
 
+      - name: Package Windows installer
+        run: npm run gulp vscode-win32-x64-setup
+        shell: powershell
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: NextGens-Windows
           path: out/
+          retention-days: 7
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: NextGens-Windows-Setup
+          path: .build/**/*.exe
           retention-days: 7

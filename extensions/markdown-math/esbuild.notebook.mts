@@ -10,11 +10,17 @@ const srcDir = path.join(import.meta.dirname, 'notebook');
 const outDir = path.join(import.meta.dirname, 'notebook-out');
 
 function postBuild(outDir: string) {
+	// Prefer the extension-local katex; fall back to the repo-root node_modules
+	// (needed when per-extension node_modules are not installed, e.g. CI with SKIP_SUBMODULE_DEPS).
+	const localKatexDir = path.join(import.meta.dirname, 'node_modules', 'katex', 'dist');
+	const rootKatexDir = path.join(import.meta.dirname, '..', '..', 'node_modules', 'katex', 'dist');
+	const katexDir = fse.existsSync(path.join(localKatexDir, 'katex.min.css')) ? localKatexDir : rootKatexDir;
+
 	fse.copySync(
-		path.join(import.meta.dirname, 'node_modules', 'katex', 'dist', 'katex.min.css'),
+		path.join(katexDir, 'katex.min.css'),
 		path.join(outDir, 'katex.min.css'));
 
-	const fontsDir = path.join(import.meta.dirname, 'node_modules', 'katex', 'dist', 'fonts');
+	const fontsDir = path.join(katexDir, 'fonts');
 	const fontsOutDir = path.join(outDir, 'fonts/');
 
 	fse.mkdirSync(fontsOutDir, { recursive: true });

@@ -111,7 +111,11 @@ export function transpileTask(src: string, out: string, esbuild?: boolean): task
 	const task = () => {
 
 		const transpile = createCompile(src, { build: false, emitError: true, transpileOnly: { esbuild: !!esbuild }, preserveEnglish: false });
-		const srcPipe = gulp.src(`${src}/**`, { base: `${src}` });
+		const srcPipe = gulp.src(`${src}/**`, {
+			base: `${src}`,
+			// Keep the separately-built react UI source out of the transpile stream (see compileTask).
+			ignore: ['**/cortexide/browser/react/src/**', '**/cortexide/browser/react/src2/**']
+		});
 
 		return srcPipe
 			.pipe(transpile())
@@ -131,7 +135,13 @@ export function compileTask(src: string, out: string, build: boolean, options: {
 		}
 
 		const compile = createCompile(src, { build, emitError: true, transpileOnly: false, preserveEnglish: !!options.preserveEnglish });
-		const srcPipe = gulp.src(`${src}/**`, { base: `${src}` });
+		const srcPipe = gulp.src(`${src}/**`, {
+			base: `${src}`,
+			// The react UI is a separate project (built by `npm run buildreact` into react/out)
+			// and is excluded from src/tsconfig.json. tsb type-checks every streamed file,
+			// so keep its source out of the compile stream.
+			ignore: ['**/cortexide/browser/react/src/**', '**/cortexide/browser/react/src2/**']
+		});
 		const generator = new MonacoGenerator(false);
 		if (src === 'src') {
 			generator.execute();
